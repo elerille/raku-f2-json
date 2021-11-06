@@ -1,7 +1,7 @@
 use F2::JSON :import;
 use Test;
 
-plan 161;
+plan 16;
 
 my @ws = " ", "\x[A]", "\x[D]", "\x[9]";
 @ws = @ws.combinations(1..2).map(*.permutations».join).flat;
