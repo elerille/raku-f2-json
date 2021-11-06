@@ -1,4 +1,4 @@
-use F2::JSON :import;
+use F2::Format::JSON :import;
 use Test;
 
 plan 13;

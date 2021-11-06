@@ -1,4 +1,4 @@
-class F2::JSON is export(:import) {
+class F2::Format::JSON is export(:import) {
 
     grammar Grammar {
         rule TOP {
@@ -114,15 +114,15 @@ class F2::JSON is export(:import) {
 
     }
 
-    multi method parse(F2::JSON:U: Str:D $data) {
+    multi method parse(F2::Format::JSON:U: Str:D $data) {
         with Grammar.parse($data, actions => Actions.new(|%_)) { .made }
         else { fail }
     }
-    multi method parsefile(F2::JSON:U: $data) {
+    multi method parsefile(F2::Format::JSON:U: $data) {
         with Grammar.parsefile($data, actions => Actions.new(|%_)) { .made }
         else { fail }
     }
-    multi method to-str(F2::JSON:U: $data is raw) {
+    multi method to-str(F2::Format::JSON:U: $data is raw) {
         my $out = $*OUT;
         $*OUT = class {
             also is IO::Handle;
@@ -144,28 +144,28 @@ class F2::JSON is export(:import) {
         return $output;
 
     }
-    multi method __serialize(F2::JSON:U: Bool:D $_) {
+    multi method __serialize(F2::Format::JSON:U: Bool:D $_) {
         print $_ ?? 'true' !! 'false'
     }
-    multi method __serialize(F2::JSON:U: Any:U $_) {
+    multi method __serialize(F2::Format::JSON:U: Any:U $_) {
         print 'null'
     }
-    multi method __serialize(F2::JSON:U: Int:D $_) {
+    multi method __serialize(F2::Format::JSON:U: Int:D $_) {
         print .Str
     }
-    multi method __serialize(F2::JSON:U: Num:D $_) {
+    multi method __serialize(F2::Format::JSON:U: Num:D $_) {
         print .Str;
         unless .Str.contains('.') {
             print '.0'
         }
     }
-    multi method __serialize(F2::JSON:U: Rational:D $_) {
+    multi method __serialize(F2::Format::JSON:U: Rational:D $_) {
         print .Str;
         unless .Str.contains('.') {
             print '.0'
         }
     }
-    multi method __serialize(F2::JSON:U: Str:D $_) {
+    multi method __serialize(F2::Format::JSON:U: Str:D $_) {
         print '"';
         print .comb.map({
             when '"' { '\\"' }
@@ -179,7 +179,7 @@ class F2::JSON is export(:import) {
         }).join;
         print '"';
     }
-    multi method __serialize(F2::JSON:U: Positional:D $_) {
+    multi method __serialize(F2::Format::JSON:U: Positional:D $_) {
         print '[';
         my $sep = False;
         for @$_ {
@@ -189,7 +189,7 @@ class F2::JSON is export(:import) {
         }
         print ']';
     }
-    multi method __serialize(F2::JSON:U: Associative:D $_) {
+    multi method __serialize(F2::Format::JSON:U: Associative:D $_) {
         print '{';
         my $sep = False;
         for @$_ {

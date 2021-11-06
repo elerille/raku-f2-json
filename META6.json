@@ -13,7 +13,7 @@
     "Test::META"
   ],
   "provides": {
-    "F2::JSON": "lib/F2/JSON.rakumod"
+    "F2::Format::JSON": "lib/F2/Format/JSON.rakumod"
   },
   "resources": [],
   "license": "GPL-3.0-or-later",
