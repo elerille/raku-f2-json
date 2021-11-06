@@ -1,0 +1,25 @@
+use F2::JSON :import;
+use Test;
+
+plan 13;
+
+is JSON.parse('{}'), %(), '{} empty object';
+dies-ok { JSON.parse('{:"asd"') }, "\{:\"asdf\"} key mandatory";
+dies-ok { JSON.parse('{"asd":') }, "\{\"asdf\":} value mandatory";
+dies-ok { JSON.parse('{0:"asd"') }, "\{0:\"asdf\"} key must be string";
+dies-ok { JSON.parse('{0.5:"asd"') }, "\{0.5:\"asdf\"} key must be string";
+dies-ok { JSON.parse('{true:"asd"') }, "\{true:\"asdf\"} key must be string";
+dies-ok { JSON.parse('{false:"asd"') }, "\{false:\"asdf\"} key must be string";
+dies-ok { JSON.parse('{null:"asd"') }, "\{null:\"asdf\"} key must be string";
+is JSON.parse('{"a": "b"}'), %(:a<b>), '{"a": "b"}';
+dies-ok { JSON.parse('{"a": "b",}') }, '{"a": "b",} trailing comma isn\'t allowed';
+is JSON.parse('{"a": "b", "d": 4, "e": true}'), %(:a<b>, :4d, :e), '{"a": "b", "d": 4, "e": true}';
+is JSON.parse('{"a": "b", "a": "c"}'),
+        @(:a<b>) | @(:a<c>) ,
+        '{"a": "b", "a": "c"} object with multiple define of key isn\'t allowed in standard';
+is JSON.parse('{"a": "b", "a": "c"}', :allow-multiple-key),
+        @(:a<b>, :a<c>),
+        '{"a": "b", "a": "c"} object with multiple define of key is allowed whe :allow-multiple-key';
+
+
+done-testing;

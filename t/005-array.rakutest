@@ -1,0 +1,17 @@
+use F2::JSON :import;
+use Test;
+
+plan 8;
+
+is JSON.parse('[]'), @(), '[] empty array';
+dies-ok { JSON.parse('[,]') }, "[,] invalid array";
+is JSON.parse('["a"]'), @("a"), '["a"]';
+is JSON.parse('["z", "a", "b", "c"]'), <z a b c>, '["z", "a", "b", "c"] order are preserved';
+dies-ok { JSON.parse('["z", "a", "b", "c",]') }, '["z", "a", "b", "c", ] trailing comma isn\'t allowed';
+is JSON.parse('["z","a","b","c"]'), <z a b c>, '["z","a","b","c"] without space';
+is JSON.parse("[\"z\"\t,\r\"a\" ,\n\"b\",\"c\"]"), <z a b c>, "[\"z\"\t,\r\"a\" ,\n\"b\",\"c\"]".raku ~ ' some space';
+is-deeply JSON.parse('[-0e2, "a", false, true]'),
+        (-0e2, "a", False, True).Array,
+        '[-0e2, "a", false, true]';
+
+done-testing;

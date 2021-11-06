@@ -1,0 +1,33 @@
+use F2::JSON :import;
+use Test;
+
+plan 26;
+
+is JSON.to-str(True), 'true', 'true';
+is JSON.to-str(False), 'false', 'false';
+is JSON.to-str(Nil), 'null', 'Nil';
+is JSON.to-str(JSON), 'null', 'Undifine object';
+is JSON.to-str("my-string"), '"my-string"', 'my-string'.raku;
+is JSON.to-str("\x[1d11e]"), "\"\x[1d11e]\"", "\x[1d11e]".raku;
+is JSON.to-str("\""), '"\\""', '"';
+is JSON.to-str("\\"), '"\\\\"', '\\';
+is JSON.to-str("/"), "\"/\"", '/';
+is JSON.to-str("\x[8]"), "\"\\b\"", '\b';
+is JSON.to-str("\x[C]"), "\"\\f\"", '\f';
+is JSON.to-str("\x[A]"), "\"\\n\"", '\n';
+is JSON.to-str("\x[D]"), "\"\\r\"", '\r';
+is JSON.to-str("\x[9]"), "\"\\t\"", '\t';
+is JSON.to-str(-1), "-1", "-1";
+is JSON.to-str(0), "0", "0";
+is JSON.to-str(-0), "0", "0";
+is JSON.to-str(1), "1", '1';
+is JSON.to-str(0.0), "0.0", '0.0';
+is JSON.to-str(-0.0), "0.0", '-0.0';
+is JSON.to-str(-0e0), "-0.0", '-0e0';
+is JSON.to-str(0e0), "0.0", '0e0';
+is JSON.to-str(123456789), "123456789", "123456789";
+is JSON.to-str(0.123), "0.123", '0.123';
+is JSON.to-str(@(0, 1, 3, 2)), "[0,1,3,2]", "[0,1,3,2]";
+is JSON.to-str(%(:a)), "\{\"a\":true}", "\{\"a\":true}";
+
+done-testing;

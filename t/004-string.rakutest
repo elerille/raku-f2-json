@@ -1,0 +1,32 @@
+use F2::JSON :import;
+use Test;
+
+plan 161;
+
+my @ws = " ", "\x[A]", "\x[D]", "\x[9]";
+@ws = @ws.combinations(1..2).map(*.permutations».join).flat;
+
+is-deeply JSON.parse('""'), "", '«""» empty string';
+dies-ok { JSON.parse("''") }, "«''» string require \"";
+is-deeply JSON.parse("\"\x[1d11e]\""), "𝄞", '«"𝄞"»';
+is-deeply JSON.parse("\"\\uD834\\uDD1E\""), "𝄞", '«"\\uD834\\uDD1E"»';
+is-deeply JSON.parse("\"\\ud834\\udd1e\""), "𝄞", '«"\\ud834\\udd1e"»';
+is-deeply JSON.parse('"\\""'), '"', '«"\\""» quote string';
+is-deeply JSON.parse('"\\\\"'), '\\', '«"\\\\"» backslash string';
+is-deeply JSON.parse('"\\/"'), '/', '«"\\/"» slash string';
+is-deeply JSON.parse('"\\b"'), "\x[8]", '«"\\b"» backspace string';
+is-deeply JSON.parse('"\\f"'), "\x[C]", '«"\\f"» form feed string';
+is-deeply JSON.parse('"\\n"'), "\x[A]", '«"\\n"» line feed string';
+is-deeply JSON.parse('"\\r"'), "\x[D]", '«"\\r"» carriage return string';
+is-deeply JSON.parse('"\\t"'), "\x[9]", '«"\\t"» tab string';
+subtest "Space before/after", {
+    my @string-values = @ws X~ '"abc"' X~ @ws;
+    plan +@string-values;
+    is-deeply JSON.parse($_), 'abc', $_.raku for @string-values;
+}
+
+# see https://github.com/moritz/json/issues/25
+is-deeply JSON.parse("\"\c[ZERO WIDTH JOINER]\""), "\c[ZERO WIDTH JOINER]", 'ZERO WIDTH JOINER';
+is-deeply JSON.parse("\"\x[85]\""), "\x[85]", "\x85";
+
+done-testing;

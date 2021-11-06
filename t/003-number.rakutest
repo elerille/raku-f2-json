@@ -1,0 +1,104 @@
+use F2::JSON :import;
+use Test;
+
+plan 4;
+
+my @ws = " ", "\x[A]", "\x[D]", "\x[9]";
+@ws = @ws.combinations(1..2).map(*.permutations».join).flat;
+
+subtest "Integer", {
+    plan 16;
+
+    dies-ok { JSON.parse("-") }, "'-' isn't valid";
+
+    is-deeply JSON.parse("0"), 0, "'0'";
+    is-deeply JSON.parse("-0"), 0, "'-0' is 0";
+    dies-ok { JSON.parse("+0") }, "'+0' isn't valid";
+    dies-ok { JSON.parse("00") }, "'00' isn't valid";
+
+    is-deeply JSON.parse("1"), 1, "'1'";
+    is-deeply JSON.parse("-1"), -1, "'-1'";
+
+    is-deeply JSON.parse("123456789123456789"), 123456789123456789, "'123456789123456789'";
+    dies-ok { JSON.parse("+123456789123456789") }, "'+123456789123456789' isn't valid";
+    is-deeply JSON.parse("-123456789123456789"), -123456789123456789, "'-123456789123456789'";
+
+    dies-ok { JSON.parse("025") }, "'025' octal doesn't supported";
+    dies-ok { JSON.parse("-025") }, "'-025' octal doesn't supported";
+
+    dies-ok { JSON.parse("0x2f") }, "'0x2f' hexa doesn't supported";
+    dies-ok { JSON.parse("0x2F") }, "'0x2F' hexa doesn't supported";
+    dies-ok { JSON.parse("-0x2f") }, "'-0x2f' hexa doesn't supported";
+    dies-ok { JSON.parse("-0x2F") }, "'-0x2F' hexa doesn't supported";
+}
+subtest "Real", {
+    plan 22;
+
+    dies-ok { JSON.parse(".0") }, "'.0' isn't valid";
+    dies-ok { JSON.parse("-.0") }, "'-.0' isn't valid";
+
+    dies-ok { JSON.parse("0.") }, "'0.' isn't valid";
+    dies-ok { JSON.parse("-0.") }, "'-0.' isn't valid";
+
+    is-deeply JSON.parse("0.0"), 0.0, "'0.0'";
+    is-deeply JSON.parse("-0.0"), 0.0, "'-0.0' is 0.0";
+    dies-ok { JSON.parse("+0.0") }, "'+0.0' isn't valid";
+
+
+    is-deeply JSON.parse("0.5"), 0.5, "'0.5'";
+    is-deeply JSON.parse("-0.5"), -0.5, "'-0.5'";
+
+    is-deeply JSON.parse("0.05"), 0.05, "'0.05'";
+    is-deeply JSON.parse("-0.05"), -0.05, "'-0.05'";
+
+    is-deeply JSON.parse("1.33"), 1.33, "'1.33'";
+    is-deeply JSON.parse("-1.33"), -1.33, "'-1.33'";
+
+    is-deeply JSON.parse("1.23456789123456789"), 1.23456789123456789, "'1.23456789123456789'";
+    dies-ok { JSON.parse("+1.23456789123456789") }, "'+1.23456789123456789' isn't valid";
+    is-deeply JSON.parse("-1.23456789123456789"), -1.23456789123456789, "'-1.23456789123456789'";
+
+    dies-ok { JSON.parse("025.22") }, "'025.22' octal doesn't supported";
+    dies-ok { JSON.parse("-025.22") }, "'-025.22' octal doesn't supported";
+
+    dies-ok {  JSON.parse("0x2f.d2") },  "'0x2f.d2' hexa doesn't supported";
+    dies-ok {  JSON.parse("0x2F.D2") },  "'0x2F.D2' hexa doesn't supported";
+    dies-ok { JSON.parse("-0x2f.d2") }, "'-0x2f.d2' hexa doesn't supported";
+    dies-ok { JSON.parse("-0x2F.D2") }, "'-0x2F.D2' hexa doesn't supported";
+}
+subtest "Exponent", {
+    plan 21;
+
+    dies-ok { JSON.parse("e5") }, "'e5' isn't valid";
+    dies-ok { JSON.parse("E5") }, "'E5' isn't valid";
+    dies-ok { JSON.parse("e-5") }, "'e-5' isn't valid";
+    dies-ok { JSON.parse("E-5") }, "'E-5' isn't valid";
+    dies-ok { JSON.parse("e+5") }, "'e+5' isn't valid";
+    dies-ok { JSON.parse("E+5") }, "'E+5' isn't valid";
+
+    dies-ok { JSON.parse("-e5") }, "'-e5' isn't valid";
+    dies-ok { JSON.parse("-E5") }, "'-E5' isn't valid";
+
+    is-deeply JSON.parse("0e5"), 0e0, "'0e5'";
+    is-deeply JSON.parse("0E5"), 0e0, "'0E5'";
+    is-deeply JSON.parse("0e0"), 0e0, "'0e0'";
+    is-deeply JSON.parse("-0e0"), -0e0, "'-0e0'";
+    is-deeply JSON.parse("1e10"), 1e10, "'1e10'";
+    is-deeply JSON.parse("1e-10"), 1e-10, "'1e-10'";
+    is-deeply JSON.parse("1e+10"), 1e10, "'1e+10'";
+    is-deeply JSON.parse("-1e10"), -1e10, "'-1e10'";
+    is-deeply JSON.parse("-1e-10"), -1e-10, "'-1e-10'";
+    is-deeply JSON.parse("-1e+10"), -1e10, "'-1e+10'";
+
+
+    is-deeply JSON.parse("-0.0e0"), -0e0, "'-0.0e0' is -0e0";
+    is-deeply JSON.parse("-1.05e8"), -1.05e8, "'-1.05e8'";
+    dies-ok { JSON.parse("+0.0e0") }, "'+0.0e0' isn't valid";
+}
+subtest "Space before/after", {
+    my @number-values = @ws X~ "-2.05e+02" X~ @ws;
+    plan +@number-values;
+    is-deeply JSON.parse($_), -2.05e+02, $_.raku for @number-values;
+}
+
+done-testing;

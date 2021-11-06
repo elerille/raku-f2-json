@@ -1,0 +1,33 @@
+use F2::JSON :import;
+use Test;
+
+plan 4;
+
+my @ws = " ", "\x[A]", "\x[D]", "\x[9]";
+#@ws = @ws.combinations(1..2).map(*.permutations».join).flat;
+
+subtest "valid true value", {
+    my @true-values = "true", |(@ws X~ "true" X~ @ws);
+    plan +@true-values;
+    is-deeply JSON.parse($_), True, $_.raku for @true-values;
+}
+
+subtest "false value", {
+    my @false-values = 'false', |(@ws X~ "false" X~ @ws);
+    plan +@false-values;
+    is-deeply JSON.parse($_), False, $_.raku for @false-values;
+}
+
+subtest "null value", {
+    my @null-values = 'null', |(@ws X~ "null" X~ @ws);
+    plan +@null-values;
+    is-deeply JSON.parse($_), Nil, $_.raku for @null-values;
+}
+
+subtest "invalid keyword value", {
+    my @invalid-keyword = <True TRUE tRuE False FALSE fAlSe Null NULL nUlL Nil nil NIL>;
+    plan +@invalid-keyword;
+    dies-ok { JSON.parse($_) }, $_.raku for @invalid-keyword;
+}
+
+done-testing;

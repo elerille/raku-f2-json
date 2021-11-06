@@ -1,0 +1,15 @@
+use F2::JSON :import;
+use Test;
+
+my @ws = " ", "\x[A]", "\x[D]", "\x[9]";
+@ws = @ws.combinations(1..2).map(*.permutations».join).flat;
+
+plan @ws+1;
+
+dies-ok { JSON.parse("") }, "Empty string isn't a valid json";
+
+dies-ok { JSON.parse($_) }, "{$_.raku} isn't a valid json" for @ws;
+
+
+
+done-testing;
